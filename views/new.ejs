@@ -6,13 +6,12 @@
   <body>
     <%- include('navbar', {links: links}) %>
     <div className = "newMessageForm">
-    <form method="POST" action="/new"></form>
+    <form method="POST" action="/new">
   <label for="Auth">Author Name</label><br>
   <input type="text" id="Auth" name="Auth"><br>
-  <label for="Date">Date</label><br>
-  <input type="text" id="Date" name="Date"><br>
   <label for="message">Message:</label><br>
   <input type="text" id="message" name="message">
+  <button type="submit">Submit</button>
     </form>
     </div>
   </body>

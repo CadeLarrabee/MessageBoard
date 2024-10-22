@@ -4,6 +4,10 @@ const path = require("node:path");
 
 const app = express();
 
+// Middleware to parse form data (urlencoded) and JSON
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
 //The setup for EJS
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
@@ -20,6 +24,7 @@ const messages = [
     added: new Date(),
   },
 ];
+
 const CurrentDate = new Date();
 
 const links = [
@@ -39,6 +44,16 @@ app.get("/new", (req, res) => {
     links: links,
     CurrentDate: CurrentDate,
   });
+});
+
+app.post("/new", (req, res) => {
+  const { text, user } = req.body; // Extract text and user from the request body
+  if (text && user) {
+    messages.push({ text, user, added: new Date() });
+    res.redirect("/");
+  } else {
+    res.status(400).send("Message and user are required");
+  }
 });
 
 //Start the server on port 3k:
