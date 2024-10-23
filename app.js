@@ -39,15 +39,19 @@ app.get("/", (req, res) => {
   });
 });
 
-app.get("/new", (req, res) => {
-  res.render("new", {
-    links: links,
-    CurrentDate: CurrentDate,
-  });
+app.get("/message/:id", (req, res) => {
+  const messageId = req.params.id;
+  const message = messages[messageId];
+
+  if (message) {
+    res.render("message", { message });
+  } else {
+    res.status(404).send("message not found");
+  }
 });
 
 app.post("/new", (req, res) => {
-  const { text, user } = req.body; // Extract text and user from the request body
+  const { text, user } = req.body;
   if (text && user) {
     messages.push({ text, user, added: new Date() });
     res.redirect("/");
