@@ -12,6 +12,9 @@ app.use(express.json());
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
+//without this we can't serve CSS files
+app.use(express.static(path.join(__dirname, "public")));
+
 const messages = [
   {
     text: "Hi there!",
