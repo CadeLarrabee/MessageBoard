@@ -53,6 +53,13 @@ app.get("/message/:id", (req, res) => {
   }
 });
 
+app.get("/new", (req, res) => {
+  res.render("new", {
+    links: links,
+    CurrentDate: CurrentDate,
+  });
+});
+
 app.post("/new", (req, res) => {
   const { text, user } = req.body;
   if (text && user) {
