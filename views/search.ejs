@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Search Results</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <%- include("navbar", { links: links }) %>
+
+    <h1>Search Results</h1>
+    <div>
+      <% if (messages && messages.length > 0) { %> <% messages.forEach((msg) =>
+      { %>
+      <div class="message">
+        <h2><%= msg.username %></h2>
+        <p><%= msg.message %></p>
+      </div>
+      <% }) %> <% } else { %>
+      <p>No messages found matching your search.</p>
+      <% } %>
+    </div>
+  </body>
+</html>

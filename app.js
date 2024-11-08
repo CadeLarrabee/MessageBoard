@@ -2,7 +2,13 @@
 const express = require("express");
 const path = require("node:path");
 
+//Express validation & assignment
+const { body, validationResult } = require("express-validator");
 const app = express();
+
+//psql DB assignment
+//self reminder- . is for relative path, .. is for leaving the folder you're in, and entering another folder at the same level
+const db = require("./db/queries");
 
 // Middleware to parse form data (urlencoded) and JSON
 app.use(express.urlencoded({ extended: true }));
@@ -15,19 +21,6 @@ app.set("view engine", "ejs");
 //without this we can't serve CSS files
 app.use(express.static(path.join(__dirname, "public")));
 
-const messages = [
-  {
-    text: "Hi there!",
-    user: "Amando",
-    added: new Date(),
-  },
-  {
-    text: "Hello World!",
-    user: "Charles",
-    added: new Date(),
-  },
-];
-
 const CurrentDate = new Date();
 
 const links = [
@@ -35,21 +28,34 @@ const links = [
   { href: "new", text: "New Message" },
 ];
 
-app.get("/", (req, res) => {
-  res.render("index", {
-    links: links,
-    messages: messages,
-  });
+app.get("/", async (req, res) => {
+  try {
+    const messages = await db.getAllMessages();
+
+    res.render("index", {
+      links: links,
+      messages: messages,
+    });
+  } catch (error) {
+    console.error("Error fetching messages:", error);
+    res.status(500).send("An error occurred while retrieving messages.");
+  }
 });
 
-app.get("/message/:id", (req, res) => {
-  const messageId = req.params.id;
-  const message = messages[messageId];
+app.get("/message/:id", async (req, res) => {
+  try {
+    const messageId = parseInt(req.params.id) + 1;
+    console.log(messageId);
+    const message = await db.getMessageById(messageId);
 
-  if (message) {
-    res.render("message", { message });
-  } else {
-    res.status(404).send("message not found");
+    if (message) {
+      res.render("message", { message });
+    } else {
+      res.status(404).send("Message not found");
+    }
+  } catch (error) {
+    console.error("Error fetching messages:", error);
+    res.status(500).send("An error occurred while retrieving messages.");
   }
 });
 
@@ -60,13 +66,46 @@ app.get("/new", (req, res) => {
   });
 });
 
-app.post("/new", (req, res) => {
-  const { text, user } = req.body;
-  if (text && user) {
-    messages.push({ text, user, added: new Date() });
+app.get("/search", async (req, res) => {
+  try {
+    const searchString = req.query.searchString;
+    console.log("Search Query:", searchString);
+    const messages = await db.searchMessage(searchString);
+
+    if (messages && messages.length > 0) {
+      res.render("search", { links: links, messages: messages });
+    } else {
+      res.status(404).send("No matching messages found");
+    }
+  } catch (error) {
+    console.error("Error fetching messages:", error);
+    res.status(500).send("An error occurred while retrieving messages.");
+  }
+});
+
+app.post("/new", async (req, res) => {
+  try {
+    const { text, user } = req.body;
+    if (text && user) {
+      console.log(text, user);
+      await db.insertMessage(user, text);
+      res.redirect("/");
+    } else {
+      res.status(400).send("Message and user are required");
+    }
+  } catch (error) {
+    console.error("Error inserting username:", error);
+    res.status(500).send("An error occurred");
+  }
+});
+
+app.post("/delete", async (req, res) => {
+  try {
+    await db.deleteAllMessages();
     res.redirect("/");
-  } else {
-    res.status(400).send("Message and user are required");
+  } catch (error) {
+    console.error("Error deleting all messages:", error);
+    res.status(500).send("An error occurred while deleting messages.");
   }
 });
 
